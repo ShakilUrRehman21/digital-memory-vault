@@ -154,8 +154,3 @@ Digital Memory Vault uses **custom JWT authentication** (no Clerk, Auth.js, or s
 3. **Protected routes** → middleware reads `auth_token`, verifies JWT → redirects to `/auth/login` if invalid
 4. **Logout** → cookie cleared server-side
 
----
-
-## License
-
-MIT
