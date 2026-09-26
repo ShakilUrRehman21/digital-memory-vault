@@ -1,0 +1,129 @@
+{
+  "label": "optimized",
+  "reps": 30,
+  "endpoints": {
+    "POST /api/auth/register": {
+      "n": 20,
+      "median": 367.8,
+      "p95": 418.9,
+      "min": 362.1,
+      "max": 440
+    },
+    "POST /api/auth/login": {
+      "n": 20,
+      "median": 363.5,
+      "p95": 376.8,
+      "min": 356.6,
+      "max": 383.6
+    },
+    "POST /api/decisions": {
+      "n": 30,
+      "median": 7,
+      "p95": 14.3,
+      "min": 5.2,
+      "max": 15.6
+    },
+    "POST /api/decisions/[id]/outcome": {
+      "n": 30,
+      "median": 8.2,
+      "p95": 18.3,
+      "min": 6.9,
+      "max": 66.2
+    },
+    "GET /api/decisions (30 decisions)": {
+      "n": 30,
+      "median": 5.8,
+      "p95": 10.5,
+      "min": 4.4,
+      "max": 12
+    },
+    "GET /api/decisions/[id]": {
+      "n": 30,
+      "median": 6.1,
+      "p95": 30.7,
+      "min": 4.9,
+      "max": 47.7
+    },
+    "GET /api/export/[id]": {
+      "n": 30,
+      "median": 5.3,
+      "p95": 14.5,
+      "min": 4.9,
+      "max": 22.7
+    }
+  },
+  "analyticsByN": {
+    "10": {
+      "n": 30,
+      "median": 6.8,
+      "p95": 14.1,
+      "min": 5.5,
+      "max": 19.2
+    },
+    "50": {
+      "n": 30,
+      "median": 8.5,
+      "p95": 13.5,
+      "min": 6.2,
+      "max": 15.9
+    },
+    "100": {
+      "n": 30,
+      "median": 7.8,
+      "p95": 15.7,
+      "min": 6.5,
+      "max": 16.6
+    },
+    "250": {
+      "n": 30,
+      "median": 10,
+      "p95": 26.8,
+      "min": 8.5,
+      "max": 54.4
+    },
+    "500": {
+      "n": 30,
+      "median": 15.6,
+      "p95": 31,
+      "min": 13.5,
+      "max": 45.6
+    }
+  },
+  "dashboardByN": {
+    "10": {
+      "n": 30,
+      "median": 18.6,
+      "p95": 37,
+      "min": 12.3,
+      "max": 40
+    },
+    "50": {
+      "n": 30,
+      "median": 18.6,
+      "p95": 31,
+      "min": 13.7,
+      "max": 83.3
+    },
+    "100": {
+      "n": 30,
+      "median": 21.2,
+      "p95": 35.8,
+      "min": 16.2,
+      "max": 38.1
+    },
+    "250": {
+      "n": 30,
+      "median": 27.3,
+      "p95": 41.8,
+      "min": 22.7,
+      "max": 46.4
+    },
+    "500": {
+      "n": 30,
+      "median": 43.1,
+      "p95": 64.8,
+      "min": 33.8,
+      "max": 100.6
+    }
+  }
+}
