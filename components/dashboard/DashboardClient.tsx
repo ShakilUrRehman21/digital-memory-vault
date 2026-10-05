@@ -3,8 +3,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import type { AnalyticsResult } from '@/lib/analytics';
+import BrandLogo from '@/components/BrandLogo';
+import SiteFooter from '@/components/SiteFooter';
 
-const AnalyticsCharts = dynamic(() => import('@/components/charts/AnalyticsCharts'), { ssr: false, loading: () => <div style={{ padding: 40, textAlign: 'center', color: '#444' }}>Loading charts…</div> });
+/** Parse JSON defensively; returns {} on failure */
+async function safeJson(res: Response): Promise<Record<string, any>> {
+    try { return await res.json(); } catch { return {}; }
+}
+
+const AnalyticsCharts = dynamic(() => import('@/components/charts/AnalyticsCharts'), { ssr: false, loading: () => <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-faint)' }}>Loading charts…</div> });
 
 type Decision = {
     id: string; userId: string; title: string; category: string;
@@ -29,7 +37,7 @@ const EMOSTATES = ['calm', 'stressed', 'excited', 'pressured', 'uncertain'] as c
 const RISKLEVELS = ['low', 'medium', 'high'] as const;
 
 function getRiskColor(risk: string) {
-    return risk === 'high' ? '#ff5b5b' : risk === 'medium' ? '#e8b84b' : '#4ecb71';
+    return risk === 'high' ? '#dc2626' : risk === 'medium' ? '#b7791f' : '#059669';
 }
 
 function getStatusBadge(status: string) {
@@ -38,11 +46,11 @@ function getStatusBadge(status: string) {
         : <span className="badge badge-yellow">Pending Outcome</span>;
 }
 
-function ScoreCard({ label, value, max = 100, color = '#4a9eff' }: { label: string; value: number; max?: number; color?: string }) {
+function ScoreCard({ label, value, max = 100, color = '#059669' }: { label: string; value: number; max?: number; color?: string }) {
     return (
         <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#555' }}>{label}</div>
-            <div style={{ fontSize: '40px', fontWeight: 700, letterSpacing: '-0.03em', color: '#f0f0f0' }}>{value}<span style={{ fontSize: '18px', color: '#333' }}>/{max}</span></div>
+            <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)' }}>{label}</div>
+            <div style={{ fontSize: '40px', fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--text-primary)' }}>{value}<span style={{ fontSize: '18px', color: 'var(--text-faint)' }}>/{max}</span></div>
             <div className="score-bar">
                 <div className="score-fill" style={{ width: `${(value / max) * 100}%`, background: `linear-gradient(90deg, ${color}, ${color}88)` }} />
             </div>
@@ -56,7 +64,7 @@ export default function DashboardClient({ user, initialDecisions, initialOutcome
     const [outcomesMap, setOutcomesMap] = useState<Record<string, Outcome>>({});
     const [activeTab, setActiveTab] = useState<'overview' | 'decisions' | 'analytics'>('overview');
     const [categoryFilter, setCategoryFilter] = useState('');
-    const [analytics, setAnalytics] = useState<any>(null);
+    const [analytics, setAnalytics] = useState<AnalyticsResult | null>(null);
     const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
     // Modals
@@ -176,20 +184,20 @@ export default function DashboardClient({ user, initialDecisions, initialOutcome
     const pending = decisions.filter((d) => d.status === 'pending_outcome').length;
     const completed = decisions.filter((d) => d.status === 'outcome_recorded').length;
 
-    const TAB_STYLE = (active: boolean) => ({
+    const TAB_STYLE = (active: boolean): React.CSSProperties => ({
         padding: '8px 20px', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
-        color: active ? '#4a9eff' : '#555', background: 'none', border: 'none',
-        borderBottom: active ? '2px solid #4a9eff' : '2px solid transparent',
+        color: active ? '#2563eb' : 'var(--text-muted)', background: 'none', border: 'none',
+        borderBottom: active ? '2px solid #2563eb' : '2px solid transparent',
         transition: 'all 0.2s', marginBottom: '-1px',
-    } as any);
+    });
 
     return (
-        <div style={{ minHeight: '100vh', background: '#000' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column' }}>
             {/* Top Nav */}
-            <nav style={{ borderBottom: '1px solid #111', padding: '0 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '60px', position: 'sticky', top: 0, background: 'rgba(0,0,0,0.95)', backdropFilter: 'blur(8px)', zIndex: 100 }}>
+            <nav style={{ borderBottom: '1px solid var(--border-primary)', padding: '0 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '60px', position: 'sticky', top: 0, background: 'rgba(15, 23, 42, 0.060)', backdropFilter: 'blur(8px)', zIndex: 100 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#4a9eff' }} />
-                    <span style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.1em', color: '#888' }}>DMV</span>
+                    <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#2563eb' }} />
+                    <span style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.1em', color: 'var(--text-secondary)' }}>DMV</span>
                 </div>
                 <div style={{ display: 'flex', gap: '4px' }}>
                     {(['overview', 'decisions', 'analytics'] as const).map((tab) => (
@@ -199,71 +207,79 @@ export default function DashboardClient({ user, initialDecisions, initialOutcome
                     ))}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <span style={{ fontSize: '12px', color: '#444' }}>{user.fullName}</span>
+                    <span style={{ fontSize: '12px', color: 'var(--text-faint)' }}>{user.fullName}</span>
                     <button className="btn btn-ghost btn-sm" onClick={handleLogout}>Logout</button>
                 </div>
             </nav>
 
-            <div style={{ padding: '40px 48px', maxWidth: '1400px', margin: '0 auto' }}>
+            <div style={{ padding: '40px clamp(16px, 4vw, 48px)', maxWidth: '1400px', margin: '0 auto', width: '100%', flex: 1 }}>
                 {/* OVERVIEW TAB */}
                 {activeTab === 'overview' && (
                     <div className="animate-fade-up">
                         <div style={{ marginBottom: '36px' }}>
-                            <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#444', marginBottom: '6px' }}>Overview</div>
+                            <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-faint)', marginBottom: '6px' }}>Overview</div>
                             <h1 style={{ fontSize: '28px', fontWeight: 600, letterSpacing: '-0.02em' }}>Behavioral Dashboard</h1>
                         </div>
 
                         {/* Metrics row */}
                         <div className="grid-4" style={{ marginBottom: '32px' }}>
                             <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#555' }}>Total Decisions</div>
+                                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)' }}>Total Decisions</div>
                                 <div style={{ fontSize: '48px', fontWeight: 700, letterSpacing: '-0.03em' }}>{decisions.length}</div>
-                                <div style={{ display: 'flex', gap: '8px', fontSize: '12px', color: '#555' }}>
-                                    <span style={{ color: '#e8b84b' }}>{pending} pending</span>
+                                <div style={{ display: 'flex', gap: '8px', fontSize: '12px', color: 'var(--text-muted)' }}>
+                                    <span style={{ color: '#b7791f' }}>{pending} pending</span>
                                     <span>·</span>
-                                    <span style={{ color: '#4ecb71' }}>{completed} complete</span>
+                                    <span style={{ color: '#059669' }}>{completed} complete</span>
                                 </div>
                             </div>
                             <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#555' }}>Pending Outcomes</div>
-                                <div style={{ fontSize: '48px', fontWeight: 700, letterSpacing: '-0.03em', color: '#e8b84b' }}>{pending}</div>
+                                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)' }}>Pending Outcomes</div>
+                                <div style={{ fontSize: '48px', fontWeight: 700, letterSpacing: '-0.03em', color: '#b7791f' }}>{pending}</div>
                                 <button className="btn btn-ghost btn-sm" style={{ width: 'fit-content' }} onClick={() => setActiveTab('decisions')}>View decisions →</button>
                             </div>
                             <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#555' }}>Outcomes Recorded</div>
-                                <div style={{ fontSize: '48px', fontWeight: 700, letterSpacing: '-0.03em', color: '#4ecb71' }}>{completed}</div>
+                                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)' }}>Outcomes Recorded</div>
+                                <div style={{ fontSize: '48px', fontWeight: 700, letterSpacing: '-0.03em', color: '#059669' }}>{completed}</div>
                                 <button className="btn btn-ghost btn-sm" style={{ width: 'fit-content' }} onClick={() => { setActiveTab('analytics'); fetchAnalytics(); }}>View analytics →</button>
                             </div>
                             <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '10px', cursor: 'pointer', borderStyle: 'dashed' }}
                                 onClick={() => { resetDecisionForm(); setShowDecisionModal(true); }}>
-                                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#555' }}>New Decision</div>
-                                <div style={{ fontSize: '48px', fontWeight: 300, color: '#4a9eff' }}>+</div>
-                                <div style={{ fontSize: '12px', color: '#444' }}>Log a new decision</div>
+                                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)' }}>New Decision</div>
+                                <div style={{ fontSize: '48px', fontWeight: 300, color: '#2563eb' }}>+</div>
+                                <div style={{ fontSize: '12px', color: 'var(--text-faint)' }}>Log a new decision</div>
                             </div>
                         </div>
 
                         {/* Recent decisions */}
-                        <div className="card">
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                <div style={{ fontSize: '13px', fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Recent Decisions</div>
+                        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid var(--border-primary)' }}>
+                                <div>
+                                    <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginBottom: '2px' }}>Activity</div>
+                                    <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)' }}>Recent Decisions</div>
+                                </div>
                                 <button className="btn btn-primary btn-sm" onClick={() => { resetDecisionForm(); setShowDecisionModal(true); }}>+ Add Decision</button>
                             </div>
                             {decisions.length === 0 ? (
-                                <div style={{ textAlign: 'center', padding: '60px 20px', color: '#333' }}>
+                                <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-faint)' }}>
                                     <div style={{ fontSize: '32px', marginBottom: '12px' }}>◈</div>
-                                    <div style={{ fontSize: '14px', marginBottom: '8px', color: '#555' }}>No decisions logged yet</div>
-                                    <div style={{ fontSize: '12px', color: '#333' }}>Start tracking your decision-making patterns</div>
+                                    <div style={{ fontSize: '14px', marginBottom: '8px', color: 'var(--text-muted)' }}>No decisions logged yet</div>
+                                    <div style={{ fontSize: '12px', color: 'var(--text-faint)' }}>Start tracking your decision-making patterns</div>
                                 </div>
                             ) : (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
-                                    {decisions.slice(0, 5).map((d) => (
-                                        <DecisionRow key={d.id} decision={d} outcome={outcomesMap[d.id]}
-                                            onEdit={() => openEditModal(d)}
-                                            onOutcome={() => { setShowOutcomeModal(d); setOutcomeForm({ actualOutcome: '', successRating: 7, lessonLearned: '', reflection: '', outcomeDate: new Date().toISOString().split('T')[0] }); }}
-                                            onDelete={() => setShowDeleteConfirm(d.id)}
-                                            onExport={() => window.open(`/api/export/${d.id}`, '_blank')}
-                                        />
-                                    ))}
+                                <div style={{ overflowX: 'auto' }}>
+                                    <div style={{ minWidth: '920px' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(240px, 1.8fr) 130px 120px 110px 160px 140px', columnGap: '16px', padding: '12px 24px', borderBottom: '1px solid var(--border-primary)', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', background: 'var(--bg-secondary)', alignItems: 'center' }}>
+                                            <span>Decision</span><span>Category</span><span>Risk</span><span>Confidence</span><span>Status</span><span style={{ textAlign: 'right' }}>Actions</span>
+                                        </div>
+                                        {decisions.slice(0, 5).map((d) => (
+                                            <DecisionRow key={d.id} decision={d} outcome={outcomesMap[d.id]}
+                                                onEdit={() => openEditModal(d)}
+                                                onOutcome={() => { setShowOutcomeModal(d); setOutcomeForm({ actualOutcome: '', successRating: 7, lessonLearned: '', reflection: '', outcomeDate: new Date().toISOString().split('T')[0] }); }}
+                                                onDelete={() => setShowDeleteConfirm(d.id)}
+                                                onExport={() => window.open(`/api/export/${d.id}`, '_blank')}
+                                            />
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -275,7 +291,7 @@ export default function DashboardClient({ user, initialDecisions, initialOutcome
                     <div className="animate-fade-up">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '28px' }}>
                             <div>
-                                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#444', marginBottom: '6px' }}>Decision Log</div>
+                                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-faint)', marginBottom: '6px' }}>Decision Log</div>
                                 <h2 style={{ fontSize: '24px', fontWeight: 600, letterSpacing: '-0.02em' }}>All Decisions</h2>
                             </div>
                             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -289,22 +305,24 @@ export default function DashboardClient({ user, initialDecisions, initialOutcome
 
                         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
                             {filteredDecisions.length === 0 ? (
-                                <div style={{ textAlign: 'center', padding: '60px 20px', color: '#333' }}>
-                                    <div style={{ fontSize: '14px', color: '#555' }}>No decisions found{categoryFilter ? ` in "${categoryFilter}"` : ''}</div>
+                                <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-faint)' }}>
+                                    <div style={{ fontSize: '14px', color: 'var(--text-muted)' }}>No decisions found{categoryFilter ? ` in "${categoryFilter}"` : ''}</div>
                                 </div>
                             ) : (
-                                <div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 100px 80px 160px', padding: '12px 24px', borderBottom: '1px solid #111', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#444' }}>
-                                        <span>Decision</span><span>Category</span><span>Risk</span><span>Confidence</span><span>Status</span><span style={{ textAlign: 'right' }}>Actions</span>
+                                <div style={{ overflowX: 'auto' }}>
+                                    <div style={{ minWidth: '920px' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(240px, 1.8fr) 130px 120px 110px 160px 140px', columnGap: '16px', padding: '12px 24px', borderBottom: '1px solid var(--border-primary)', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-muted)', background: 'var(--bg-secondary)', alignItems: 'center' }}>
+                                            <span>Decision</span><span>Category</span><span>Risk</span><span>Confidence</span><span>Status</span><span style={{ textAlign: 'right' }}>Actions</span>
+                                        </div>
+                                        {filteredDecisions.map((d) => (
+                                            <DecisionRow key={d.id} decision={d} outcome={outcomesMap[d.id]}
+                                                onEdit={() => openEditModal(d)}
+                                                onOutcome={() => { setShowOutcomeModal(d); setOutcomeForm({ actualOutcome: '', successRating: 7, lessonLearned: '', reflection: '', outcomeDate: new Date().toISOString().split('T')[0] }); }}
+                                                onDelete={() => setShowDeleteConfirm(d.id)}
+                                                onExport={() => window.open(`/api/export/${d.id}`, '_blank')}
+                                            />
+                                        ))}
                                     </div>
-                                    {filteredDecisions.map((d) => (
-                                        <DecisionRow key={d.id} decision={d} outcome={outcomesMap[d.id]}
-                                            onEdit={() => openEditModal(d)}
-                                            onOutcome={() => { setShowOutcomeModal(d); setOutcomeForm({ actualOutcome: '', successRating: 7, lessonLearned: '', reflection: '', outcomeDate: new Date().toISOString().split('T')[0] }); }}
-                                            onDelete={() => setShowDeleteConfirm(d.id)}
-                                            onExport={() => window.open(`/api/export/${d.id}`, '_blank')}
-                                        />
-                                    ))}
                                 </div>
                             )}
                         </div>
@@ -316,7 +334,7 @@ export default function DashboardClient({ user, initialDecisions, initialOutcome
                     <div className="animate-fade-up">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '28px' }}>
                             <div>
-                                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#444', marginBottom: '6px' }}>Analytics</div>
+                                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-faint)', marginBottom: '6px' }}>Analytics</div>
                                 <h2 style={{ fontSize: '24px', fontWeight: 600, letterSpacing: '-0.02em' }}>Behavioral Intelligence</h2>
                             </div>
                             <button className="btn btn-ghost btn-sm" onClick={fetchAnalytics} disabled={analyticsLoading}>
@@ -325,7 +343,7 @@ export default function DashboardClient({ user, initialDecisions, initialOutcome
                         </div>
 
                         {analyticsLoading && !analytics && (
-                            <div style={{ display: 'flex', justifyContent: 'center', padding: '80px', color: '#444' }}>
+                            <div style={{ display: 'flex', justifyContent: 'center', padding: '80px', color: 'var(--text-faint)' }}>
                                 <div className="spinner" /><span style={{ marginLeft: 12 }}>Computing analytics…</span>
                             </div>
                         )}
@@ -333,15 +351,15 @@ export default function DashboardClient({ user, initialDecisions, initialOutcome
                         {analytics && (
                             <>
                                 <div className="grid-4" style={{ marginBottom: '24px' }}>
-                                    <ScoreCard label="Decision Accuracy" value={analytics.decisionAccuracyScore} color="#4a9eff" />
-                                    <ScoreCard label="Risk Calibration" value={analytics.riskCalibrationScore} color="#9b7fea" />
-                                    <ScoreCard label="Emotional Bias" value={analytics.emotionalBiasScore} color="#ff5b5b" />
-                                    <ScoreCard label="Confidence Score" value={analytics.confidenceCalibrationScore} color="#4ecb71" />
+                                    <ScoreCard label="Decision Accuracy" value={analytics.decisionAccuracyScore} color="#2563eb" />
+                                    <ScoreCard label="Risk Calibration" value={analytics.riskCalibrationScore} color="#7c3aed" />
+                                    <ScoreCard label="Emotional Bias" value={analytics.emotionalBiasScore} color="#dc2626" />
+                                    <ScoreCard label="Confidence Score" value={analytics.confidenceCalibrationScore} color="#059669" />
                                 </div>
 
                                 <div className="grid-2" style={{ marginBottom: '24px' }}>
                                     <div className="card">
-                                        <div style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#555', marginBottom: '12px' }}>Calibration Insights</div>
+                                        <div style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '12px' }}>Calibration Insights</div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                             {[
                                                 { label: 'Overconfidence Rate', value: `${analytics.overconfidenceRate}%`, warn: analytics.overconfidenceRate > 50 },
@@ -349,27 +367,27 @@ export default function DashboardClient({ user, initialDecisions, initialOutcome
                                                 { label: 'High-Risk Success', value: `${analytics.highRiskSuccessRate}%` },
                                                 { label: 'Low-Risk Success', value: `${analytics.lowRiskSuccessRate}%` },
                                             ].map((item) => (
-                                                <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: '#080808', borderRadius: 8, border: '1px solid #111' }}>
-                                                    <span style={{ fontSize: '13px', color: '#666' }}>{item.label}</span>
-                                                    <span style={{ fontSize: '16px', fontWeight: 600, color: item.warn ? '#ff5b5b' : '#f0f0f0' }}>{item.value}</span>
+                                                <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'var(--bg-secondary)', borderRadius: 8, border: '1px solid var(--border-primary)' }}>
+                                                    <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>{item.label}</span>
+                                                    <span style={{ fontSize: '16px', fontWeight: 600, color: item.warn ? '#dc2626' : 'var(--text-primary)' }}>{item.value}</span>
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
                                     <div className="card">
-                                        <div style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#555', marginBottom: '12px' }}>Risk Distribution</div>
+                                        <div style={{ fontSize: '11px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '12px' }}>Risk Distribution</div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                                             {[
-                                                { label: 'Low Risk', key: 'low', color: '#4ecb71' },
-                                                { label: 'Medium Risk', key: 'medium', color: '#e8b84b' },
-                                                { label: 'High Risk', key: 'high', color: '#ff5b5b' },
+                                                { label: 'Low Risk', key: 'low', color: '#059669' },
+                                                { label: 'Medium Risk', key: 'medium', color: '#b7791f' },
+                                                { label: 'High Risk', key: 'high', color: '#dc2626' },
                                             ].map((item) => {
                                                 const total = Object.values(analytics.riskDistribution as Record<string, number>).reduce((a: number, b: number) => a + b, 0) || 1;
                                                 const pct = Math.round(((analytics.riskDistribution[item.key] || 0) / total) * 100);
                                                 return (
                                                     <div key={item.key}>
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                                                            <span style={{ fontSize: '12px', color: '#666' }}>{item.label}</span>
+                                                            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{item.label}</span>
                                                             <span style={{ fontSize: '12px', color: item.color, fontWeight: 600 }}>{analytics.riskDistribution[item.key] || 0} ({pct}%)</span>
                                                         </div>
                                                         <div className="score-bar">
@@ -387,9 +405,9 @@ export default function DashboardClient({ user, initialDecisions, initialOutcome
                         )}
 
                         {!analytics && !analyticsLoading && (
-                            <div style={{ textAlign: 'center', padding: '80px 20px', color: '#333' }}>
-                                <div style={{ fontSize: '14px', color: '#555', marginBottom: '16px' }}>No analytics data yet</div>
-                                <div style={{ fontSize: '12px', color: '#333' }}>Add decisions and record outcomes to generate insights</div>
+                            <div style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-faint)' }}>
+                                <div style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '16px' }}>No analytics data yet</div>
+                                <div style={{ fontSize: '12px', color: 'var(--text-faint)' }}>Add decisions and record outcomes to generate insights</div>
                                 <button className="btn btn-primary" style={{ marginTop: '20px' }} onClick={fetchAnalytics}>Compute Analytics</button>
                             </div>
                         )}
@@ -445,13 +463,13 @@ export default function DashboardClient({ user, initialDecisions, initialOutcome
                                 </div>
                             </div>
                             <div className="form-group">
-                                <label className="label">Confidence Level: <strong style={{ color: '#4a9eff' }}>{decisionForm.confidenceLevel}/10</strong></label>
-                                <input type="range" min={1} max={10} value={decisionForm.confidenceLevel} onChange={(e) => setDecisionForm({ ...decisionForm, confidenceLevel: Number(e.target.value) })} style={{ width: '100%', accentColor: '#4a9eff' }} />
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#444', marginTop: '4px' }}>
+                                <label className="label">Confidence Level: <strong style={{ color: '#2563eb' }}>{decisionForm.confidenceLevel}/10</strong></label>
+                                <input type="range" min={1} max={10} value={decisionForm.confidenceLevel} onChange={(e) => setDecisionForm({ ...decisionForm, confidenceLevel: Number(e.target.value) })} style={{ width: '100%', accentColor: '#2563eb' }} />
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--text-faint)', marginTop: '4px' }}>
                                     <span>1 — Total uncertainty</span><span>10 — Absolute certainty</span>
                                 </div>
                             </div>
-                            {formError && <div style={{ padding: '10px 14px', background: 'rgba(255,91,91,0.06)', border: '1px solid rgba(255,91,91,0.2)', borderRadius: '8px', fontSize: '13px', color: '#ff5b5b' }}>{formError}</div>}
+                            {formError && <div style={{ padding: '10px 14px', background: 'rgba(255,91,91,0.06)', border: '1px solid rgba(255,91,91,0.2)', borderRadius: '8px', fontSize: '13px', color: '#dc2626' }}>{formError}</div>}
                         </div>
                         <div className="modal-footer">
                             <button className="btn btn-ghost" onClick={() => { setShowDecisionModal(false); resetDecisionForm(); }}>Cancel</button>
@@ -470,7 +488,7 @@ export default function DashboardClient({ user, initialDecisions, initialOutcome
                         <div className="modal-header">
                             <div>
                                 <h3 style={{ fontSize: '16px', fontWeight: 600 }}>Record Outcome</h3>
-                                <div style={{ fontSize: '12px', color: '#555', marginTop: '4px' }}>{showOutcomeModal.title}</div>
+                                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>{showOutcomeModal.title}</div>
                             </div>
                             <button className="btn btn-ghost btn-icon" onClick={() => setShowOutcomeModal(null)} style={{ fontSize: '18px' }}>×</button>
                         </div>
@@ -480,8 +498,8 @@ export default function DashboardClient({ user, initialDecisions, initialOutcome
                                 <textarea className="input" rows={3} placeholder="What actually happened?" value={outcomeForm.actualOutcome} onChange={(e) => setOutcomeForm({ ...outcomeForm, actualOutcome: e.target.value })} />
                             </div>
                             <div className="form-group">
-                                <label className="label">Success Rating: <strong style={{ color: '#4a9eff' }}>{outcomeForm.successRating}/10</strong></label>
-                                <input type="range" min={1} max={10} value={outcomeForm.successRating} onChange={(e) => setOutcomeForm({ ...outcomeForm, successRating: Number(e.target.value) })} style={{ width: '100%', accentColor: '#4a9eff' }} />
+                                <label className="label">Success Rating: <strong style={{ color: '#2563eb' }}>{outcomeForm.successRating}/10</strong></label>
+                                <input type="range" min={1} max={10} value={outcomeForm.successRating} onChange={(e) => setOutcomeForm({ ...outcomeForm, successRating: Number(e.target.value) })} style={{ width: '100%', accentColor: '#2563eb' }} />
                             </div>
                             <div className="form-group">
                                 <label className="label">Lesson Learned</label>
@@ -495,7 +513,7 @@ export default function DashboardClient({ user, initialDecisions, initialOutcome
                                 <label className="label">Outcome Date</label>
                                 <input type="date" className="input" value={outcomeForm.outcomeDate} onChange={(e) => setOutcomeForm({ ...outcomeForm, outcomeDate: e.target.value })} />
                             </div>
-                            {formError && <div style={{ padding: '10px 14px', background: 'rgba(255,91,91,0.06)', border: '1px solid rgba(255,91,91,0.2)', borderRadius: '8px', fontSize: '13px', color: '#ff5b5b' }}>{formError}</div>}
+                            {formError && <div style={{ padding: '10px 14px', background: 'rgba(255,91,91,0.06)', border: '1px solid rgba(255,91,91,0.2)', borderRadius: '8px', fontSize: '13px', color: '#dc2626' }}>{formError}</div>}
                         </div>
                         <div className="modal-footer">
                             <button className="btn btn-ghost" onClick={() => setShowOutcomeModal(null)}>Cancel</button>
@@ -516,7 +534,7 @@ export default function DashboardClient({ user, initialDecisions, initialOutcome
                             <button className="btn btn-ghost btn-icon" onClick={() => setShowDeleteConfirm(null)} style={{ fontSize: '18px' }}>×</button>
                         </div>
                         <div className="modal-body">
-                            <p style={{ fontSize: '14px', color: '#888', lineHeight: 1.6 }}>
+                            <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                                 This will permanently delete this decision and its outcome. This action cannot be undone.
                             </p>
                         </div>
@@ -536,24 +554,54 @@ function DecisionRow({ decision, outcome, onEdit, onOutcome, onDelete, onExport 
     onEdit: () => void; onOutcome: () => void; onDelete: () => void; onExport: () => void;
 }) {
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px 100px 80px 160px', padding: '14px 24px', borderBottom: '1px solid #0e0e0e', alignItems: 'center', transition: 'background 0.15s' }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = '#080808'; }}
+        <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(240px, 1.8fr) 130px 120px 110px 160px 140px',
+            columnGap: '16px',
+            padding: '16px 24px',
+            borderBottom: '1px solid var(--border-primary)',
+            alignItems: 'center',
+            transition: 'background 0.15s ease'
+        }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-secondary)'; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
-            <div>
-                <div style={{ fontSize: '13px', fontWeight: 500, color: '#e0e0e0', marginBottom: '2px' }}>{decision.title}</div>
-                <div style={{ fontSize: '11px', color: '#444' }}>{new Date(decision.decisionDate).toISOString().split('T')[0]}</div>
+            <div style={{ paddingRight: '12px', overflow: 'hidden' }}>
+                <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '3px', lineHeight: 1.35, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{decision.title}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{new Date(decision.decisionDate).toISOString().split('T')[0]}</div>
             </div>
-            <span className="badge">{decision.category}</span>
-            <span className="badge" style={{ color: getRiskColor(decision.riskLevel), borderColor: getRiskColor(decision.riskLevel) + '33' }}>{decision.riskLevel}</span>
-            <span style={{ fontSize: '14px', fontWeight: 600, color: '#f0f0f0', fontFamily: 'JetBrains Mono, monospace' }}>{decision.confidenceLevel}<span style={{ fontSize: '11px', color: '#444' }}>/10</span></span>
-            {getStatusBadge(decision.status)}
-            <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                {decision.status === 'pending_outcome' && (
-                    <button className="btn btn-ghost btn-sm" onClick={onOutcome} title="Record Outcome" style={{ fontSize: '11px' }}>+ Outcome</button>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span className="badge" style={{ textTransform: 'capitalize' }}>{decision.category}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span className="badge" style={{
+                    color: getRiskColor(decision.riskLevel),
+                    borderColor: getRiskColor(decision.riskLevel) + '33',
+                    background: getRiskColor(decision.riskLevel) + '12',
+                    textTransform: 'capitalize',
+                    fontWeight: 600
+                }}>{decision.riskLevel}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}>
+                    {decision.confidenceLevel}<span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 500 }}>/10</span>
+                </span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '3px' }}>
+                {getStatusBadge(decision.status)}
+                {outcome && (
+                    <div style={{ fontSize: '11px', color: '#059669', fontWeight: 600, letterSpacing: '0.02em', display: 'flex', alignItems: 'center', gap: '3px' }}>
+                        <span>★</span>
+                        <span>{outcome.successRating}/10</span>
+                    </div>
                 )}
-                <button className="btn btn-ghost btn-icon" onClick={onEdit} title="Edit" style={{ fontSize: '14px' }}>✎</button>
-                <button className="btn btn-ghost btn-icon" onClick={onExport} title="Export" style={{ fontSize: '12px' }}>↗</button>
-                <button className="btn btn-ghost btn-icon btn-danger" onClick={onDelete} title="Delete" style={{ fontSize: '14px' }}>×</button>
+            </div>
+            <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                {decision.status === 'pending_outcome' && (
+                    <button className="btn btn-ghost btn-sm" onClick={onOutcome} title="Record Outcome" style={{ fontSize: '11px', padding: '5px 10px' }}>+ Outcome</button>
+                )}
+                <button className="btn btn-ghost btn-icon" onClick={onEdit} title="Edit Decision" style={{ fontSize: '13px', width: 32, height: 32 }}>✎</button>
+                <button className="btn btn-ghost btn-icon" onClick={onExport} title="Export PDF Dossier" style={{ fontSize: '13px', width: 32, height: 32 }}>↗</button>
+                <button className="btn btn-ghost btn-icon btn-danger" onClick={onDelete} title="Delete Decision" style={{ fontSize: '14px', width: 32, height: 32 }}>×</button>
             </div>
         </div>
     );

@@ -15,14 +15,15 @@ interface Props {
     };
 }
 
-const COLORS = ['#4a9eff', '#9b7fea', '#4ecb71', '#e8b84b', '#ff5b5b'];
+const COLORS = ['#0284c7', '#7c3aed', '#059669', '#b7791f', '#dc2626'];
 
 const TOOLTIP_STYLE = {
-    background: '#0e0e0e',
-    border: '1px solid #1c1c1c',
-    borderRadius: 8,
-    color: '#e0e0e0',
+    background: '#ffffff',
+    border: '1px solid #e2e8f0',
+    borderRadius: 10,
+    color: '#0f172a',
     fontSize: 12,
+    boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.1)',
 };
 
 export default function AnalyticsCharts({ analytics }: Props) {
@@ -33,89 +34,126 @@ export default function AnalyticsCharts({ analytics }: Props) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
             {/* Confidence vs Outcome Scatter */}
             <div className="card">
-                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#555', marginBottom: '4px' }}>Confidence vs Outcome Scatter</div>
-                <div style={{ fontSize: '12px', color: '#333', marginBottom: '20px' }}>Each point is one completed decision. Ideal alignment = diagonal line.</div>
+                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                    Confidence vs Outcome Scatter
+                </div>
+                <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px' }}>
+                    Each point represents one completed decision. Ideal calibration aligns along the diagonal.
+                </div>
                 {analytics.confidenceVsOutcome.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '40px', color: '#333', fontSize: '13px' }}>No completed decisions yet</div>
+                    <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', fontSize: '13px' }}>
+                        No completed decisions recorded yet
+                    </div>
                 ) : (
                     <ResponsiveContainer width="100%" height={280}>
                         <ScatterChart margin={{ top: 10, right: 10, bottom: 10, left: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#111" />
-                            <XAxis dataKey="confidence" type="number" domain={[0, 10]} name="Confidence" label={{ value: 'Confidence Level', position: 'insideBottom', offset: -5, fill: '#444', fontSize: 11 }} tick={{ fill: '#444', fontSize: 11 }} />
-                            <YAxis dataKey="outcome" type="number" domain={[0, 10]} name="Outcome" label={{ value: 'Outcome', angle: -90, position: 'insideLeft', fill: '#444', fontSize: 11 }} tick={{ fill: '#444', fontSize: 11 }} />
-                            <Tooltip contentStyle={TOOLTIP_STYLE} cursor={{ stroke: '#2a2a2a' }} content={({ active, payload }) => {
-                                if (active && payload?.length) {
-                                    const d = payload[0].payload;
-                                    return (
-                                        <div style={{ ...TOOLTIP_STYLE, padding: '10px 14px' }}>
-                                            <div style={{ fontWeight: 600, marginBottom: 4, maxWidth: 200 }}>{d.title}</div>
-                                            <div style={{ color: '#4a9eff' }}>Confidence: {d.confidence}/10</div>
-                                            <div style={{ color: '#4ecb71' }}>Outcome: {d.outcome}/10</div>
-                                        </div>
-                                    );
-                                }
-                                return null;
-                            }} />
-                            <Scatter name="Decisions" data={analytics.confidenceVsOutcome} fill="#4a9eff" fillOpacity={0.8} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                            <XAxis
+                                dataKey="confidence"
+                                type="number"
+                                domain={[0, 10]}
+                                name="Confidence"
+                                label={{ value: 'Confidence Level', position: 'insideBottom', offset: -5, fill: '#64748b', fontSize: 11 }}
+                                tick={{ fill: '#64748b', fontSize: 11 }}
+                            />
+                            <YAxis
+                                dataKey="outcome"
+                                type="number"
+                                domain={[0, 10]}
+                                name="Outcome"
+                                label={{ value: 'Outcome', angle: -90, position: 'insideLeft', fill: '#64748b', fontSize: 11 }}
+                                tick={{ fill: '#64748b', fontSize: 11 }}
+                            />
+                            <Tooltip
+                                contentStyle={TOOLTIP_STYLE}
+                                cursor={{ stroke: '#cbd5e1' }}
+                                content={({ active, payload }) => {
+                                    if (active && payload?.length) {
+                                        const d = payload[0].payload;
+                                        return (
+                                            <div style={{ ...TOOLTIP_STYLE, padding: '10px 14px' }}>
+                                                <div style={{ fontWeight: 600, marginBottom: 4, maxWidth: 200, color: '#0f172a' }}>{d.title}</div>
+                                                <div style={{ color: '#0284c7' }}>Confidence: {d.confidence}/10</div>
+                                                <div style={{ color: '#059669' }}>Outcome: {d.outcome}/10</div>
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                }}
+                            />
+                            <Scatter name="Decisions" data={analytics.confidenceVsOutcome} fill="#0284c7" fillOpacity={0.8} />
                         </ScatterChart>
                     </ResponsiveContainer>
                 )}
             </div>
 
             <div className="grid-2">
-                {/* Monthly Trend */}
+                {/* Monthly Calibration Trend */}
                 <div className="card">
-                    <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#555', marginBottom: '20px' }}>Monthly Outcome Trend</div>
+                    <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                        Calibration Score Trend
+                    </div>
+                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px' }}>
+                        Average calibration score per month (0–100)
+                    </div>
                     {analytics.monthlyTrend.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '40px', color: '#333', fontSize: '13px' }}>No trend data yet</div>
+                        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', fontSize: '13px' }}>No trend data yet</div>
                     ) : (
                         <ResponsiveContainer width="100%" height={220}>
-                            <LineChart data={analytics.monthlyTrend} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#111" />
-                                <XAxis dataKey="month" tick={{ fill: '#444', fontSize: 11 }} />
-                                <YAxis domain={[0, 10]} tick={{ fill: '#444', fontSize: 11 }} />
+                            <LineChart data={analytics.monthlyTrend}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                                <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 11 }} />
+                                <YAxis domain={[0, 100]} tick={{ fill: '#64748b', fontSize: 11 }} />
                                 <Tooltip contentStyle={TOOLTIP_STYLE} />
-                                <Line type="monotone" dataKey="avgScore" stroke="#4a9eff" strokeWidth={2} dot={{ fill: '#4a9eff', r: 4 }} name="Avg Score" />
-                                <Line type="monotone" dataKey="count" stroke="#9b7fea" strokeWidth={1} strokeDasharray="4 4" dot={false} name="# Decisions" />
+                                <Line type="monotone" dataKey="avgScore" stroke="#059669" strokeWidth={2.5} dot={{ fill: '#059669', r: 4 }} name="Avg Score" />
                             </LineChart>
                         </ResponsiveContainer>
                     )}
                 </div>
 
-                {/* Emotional Distribution */}
+                {/* Emotional State Breakdown */}
                 <div className="card">
-                    <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#555', marginBottom: '20px' }}>Emotional Pattern Distribution</div>
+                    <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                        Emotional State at Decision
+                    </div>
+                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px' }}>
+                        Distribution of emotional conditions
+                    </div>
                     {emotionalData.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '40px', color: '#333', fontSize: '13px' }}>No data yet</div>
+                        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', fontSize: '13px' }}>No data yet</div>
                     ) : (
                         <ResponsiveContainer width="100%" height={220}>
                             <PieChart>
-                                <Pie data={emotionalData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} innerRadius={40} paddingAngle={3}>
-                                    {emotionalData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                                <Pie data={emotionalData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={75} label={({ name, percent }: { name?: string; percent?: number }) => `${name ?? ''} ${((percent ?? 0) * 100).toFixed(0)}%`}>
+                                    {emotionalData.map((_, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                    ))}
                                 </Pie>
                                 <Tooltip contentStyle={TOOLTIP_STYLE} />
-                                <Legend iconType="circle" iconSize={8} formatter={(value) => <span style={{ color: '#666', fontSize: 11 }}>{value}</span>} />
                             </PieChart>
                         </ResponsiveContainer>
                     )}
                 </div>
             </div>
 
-            {/* Category Bar */}
+            {/* Decisions by Category */}
             <div className="card">
-                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#555', marginBottom: '20px' }}>Decisions by Category</div>
+                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                    Decisions by Domain
+                </div>
+                <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px' }}>
+                    Volume across core strategic categories
+                </div>
                 {categoryData.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '40px', color: '#333', fontSize: '13px' }}>No data yet</div>
+                    <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)', fontSize: '13px' }}>No data yet</div>
                 ) : (
-                    <ResponsiveContainer width="100%" height={180}>
+                    <ResponsiveContainer width="100%" height={200}>
                         <BarChart data={categoryData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#111" />
-                            <XAxis dataKey="name" tick={{ fill: '#444', fontSize: 11 }} />
-                            <YAxis tick={{ fill: '#444', fontSize: 11 }} allowDecimals={false} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                            <XAxis dataKey="name" tick={{ fill: '#64748b', fontSize: 11 }} />
+                            <YAxis allowDecimals={false} tick={{ fill: '#64748b', fontSize: 11 }} />
                             <Tooltip contentStyle={TOOLTIP_STYLE} />
-                            <Bar dataKey="value" name="Decisions" radius={[4, 4, 0, 0]}>
-                                {categoryData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                            </Bar>
+                            <Bar dataKey="value" fill="#10b981" radius={[6, 6, 0, 0]} name="Decisions" />
                         </BarChart>
                     </ResponsiveContainer>
                 )}

@@ -109,7 +109,7 @@ export default function StackedScroll() {
     }, []);
 
     return (
-        <section ref={sectionRef} style={{ height: '100vh', overflow: 'hidden', position: 'relative', background: '#050505' }}>
+        <section ref={sectionRef} style={{ height: '100vh', overflow: 'hidden', position: 'relative', background: 'var(--bg-secondary)' }}>
             {/* Title Header */}
             <div style={{
                 position: 'absolute',
@@ -119,12 +119,12 @@ export default function StackedScroll() {
                 maxWidth: '500px'
             }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#4a9eff', boxShadow: '0 0 10px #4a9eff' }} />
-                    <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#666', fontWeight: 600 }}>Analytics Engine</span>
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 10px #10b981' }} />
+                    <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--text-muted)', fontWeight: 600 }}>Analytics Engine</span>
                 </div>
-                <h2 style={{ fontSize: 'clamp(28px, 4.5vw, 48px)', fontWeight: 600, letterSpacing: '-0.02em', color: '#ffffff', lineHeight: 1.1 }}>
+                <h2 style={{ fontSize: 'clamp(28px, 4.5vw, 48px)', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)', lineHeight: 1.1 }}>
                     Four Layers of<br />
-                    <span style={{ color: '#444' }}>Behavioral Intelligence</span>
+                    <span style={{ color: 'var(--text-muted)' }}>Behavioral Intelligence</span>
                 </h2>
             </div>
 
@@ -147,33 +147,32 @@ export default function StackedScroll() {
                             width: 'calc(100% - clamp(40px, 12vw, 200px))',
                             maxWidth: '820px',
                             height: 'min(520px, 65vh)',
-                            background: '#0d0d0d',
-                            border: '1px solid #1a1a1a',
-                            borderRadius: '20px',
+                            background: 'var(--bg-card)',
+                            border: '1px solid var(--border-primary)',
+                            borderRadius: '24px',
                             padding: 'clamp(32px, 6vw, 64px)',
-                            boxShadow: '0 50px 100px rgba(0,0,0,0.9)',
+                            boxShadow: '0 40px 80px -24px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(15, 23, 42, 0.03)',
                             transformOrigin: 'top center',
                             display: 'flex',
                             flexDirection: 'column',
                             justifyContent: 'space-between',
-                            // Offset from top to clear header
                             top: 'clamp(180px, 32vh, 300px)',
                             zIndex: i,
                         }}
                     >
                         <div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-                                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.15em', color: '#cccccc', fontWeight: 600 }}>{card.subtitle}</div>
-                                <div style={{ fontSize: 'clamp(40px, 6vw, 60px)', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.04em', lineHeight: 1, fontFamily: 'JetBrains Mono, monospace', opacity: 0.9 }}>{card.number}</div>
+                                <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--text-secondary)', fontWeight: 600 }}>{card.subtitle}</div>
+                                <div style={{ fontSize: 'clamp(40px, 6vw, 60px)', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1, fontFamily: 'JetBrains Mono, monospace', background: 'linear-gradient(135deg, #10b981, #0284c7)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>{card.number}</div>
                             </div>
-                            <h3 style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', fontWeight: 600, letterSpacing: '-0.02em', color: '#ffffff', marginBottom: '20px' }}>{card.title}</h3>
-                            <p style={{ fontSize: 'clamp(15px, 2vw, 17px)', lineHeight: 1.7, color: '#f0f0f0', maxWidth: '600px' }}>{card.description}</p>
+                            <h3 style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)', marginBottom: '20px' }}>{card.title}</h3>
+                            <p style={{ fontSize: 'clamp(15px, 2vw, 17px)', lineHeight: 1.7, color: 'var(--text-secondary)', maxWidth: '600px' }}>{card.description}</p>
                         </div>
 
                         <div>
-                            <div style={{ padding: '20px 24px', background: '#050505', border: '1px solid #161616', borderRadius: '12px', marginBottom: '32px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.5)' }}>
-                                <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#666', marginBottom: '8px' }}>{card.metric}</div>
-                                <code style={{ fontSize: '13px', color: '#4a9eff', fontFamily: 'JetBrains Mono, monospace', opacity: 1, wordBreak: 'break-all' }}>{card.detail}</code>
+                            <div style={{ padding: '20px 24px', background: 'var(--bg-secondary)', border: '1px solid var(--border-primary)', borderRadius: '12px', marginBottom: '32px' }}>
+                                <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)', marginBottom: '8px' }}>{card.metric}</div>
+                                <code style={{ fontSize: '13px', color: '#047857', fontFamily: 'JetBrains Mono, monospace', opacity: 1, wordBreak: 'break-all' }}>{card.detail}</code>
                             </div>
 
                             <div style={{ display: 'flex', gap: '14px' }}>
@@ -182,8 +181,8 @@ export default function StackedScroll() {
                                         width: 6,
                                         height: 6,
                                         borderRadius: '50%',
-                                        background: dotIndex <= i ? '#4a9eff' : '#222',
-                                        boxShadow: dotIndex <= i ? '0 0 8px #4a9eff' : 'none',
+                                        background: dotIndex <= i ? '#10b981' : 'var(--border-secondary)',
+                                        boxShadow: dotIndex <= i ? '0 0 8px rgba(16, 185, 129, 0.6)' : 'none',
                                         transition: 'all 0.4s cubic-bezier(0.23, 1, 0.32, 1)'
                                     }} />
                                 ))}
