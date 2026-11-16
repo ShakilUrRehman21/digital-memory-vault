@@ -194,10 +194,10 @@ export default function DashboardClient({ user, initialDecisions, initialOutcome
     return (
         <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column' }}>
             {/* Top Nav */}
-            <nav style={{ borderBottom: '1px solid var(--border-primary)', padding: '0 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '60px', position: 'sticky', top: 0, background: 'rgba(15, 23, 42, 0.060)', backdropFilter: 'blur(8px)', zIndex: 100 }}>
+            <nav style={{ borderBottom: '2px solid var(--text-primary)', padding: '0 clamp(16px, 4vw, 48px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '60px', position: 'sticky', top: 0, background: 'rgba(15, 23, 42, 0.060)', backdropFilter: 'blur(8px)', zIndex: 100 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#2563eb' }} />
-                    <span style={{ fontSize: '12px', fontWeight: 600, letterSpacing: '0.1em', color: 'var(--text-secondary)' }}>DMV</span>
+                    <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent)' }} />
+                    <span style={{ fontSize: '16px', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>Memory Vault</span>
                 </div>
                 <div style={{ display: 'flex', gap: '4px' }}>
                     {(['overview', 'decisions', 'analytics'] as const).map((tab) => (
@@ -212,40 +212,40 @@ export default function DashboardClient({ user, initialDecisions, initialOutcome
                 </div>
             </nav>
 
-            <div style={{ padding: '40px clamp(16px, 4vw, 48px)', maxWidth: '1400px', margin: '0 auto', width: '100%', flex: 1 }}>
+            <div style={{ padding: '28px clamp(16px, 4vw, 48px)', maxWidth: '1400px', margin: '0 auto', width: '100%', flex: 1 }}>
                 {/* OVERVIEW TAB */}
                 {activeTab === 'overview' && (
                     <div className="animate-fade-up">
-                        <div style={{ marginBottom: '36px' }}>
+                        <div style={{ marginBottom: '24px' }}>
                             <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-faint)', marginBottom: '6px' }}>Overview</div>
-                            <h1 style={{ fontSize: '28px', fontWeight: 600, letterSpacing: '-0.02em' }}>Behavioral Dashboard</h1>
+                            <h1 style={{ fontSize: 'clamp(34px, 5vw, 56px)', fontWeight: 800, letterSpacing: '-0.055em', lineHeight: 0.95 }}>Your decisions, <span style={{ color: 'var(--accent)' }}>on the record.</span></h1>
                         </div>
 
                         {/* Metrics row */}
                         <div className="grid-4" style={{ marginBottom: '32px' }}>
                             <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)' }}>Total Decisions</div>
-                                <div style={{ fontSize: '48px', fontWeight: 700, letterSpacing: '-0.03em' }}>{decisions.length}</div>
+                                <div style={{ fontSize: '40px', fontWeight: 800, letterSpacing: '-0.03em' }}>{decisions.length}</div>
                                 <div style={{ display: 'flex', gap: '8px', fontSize: '12px', color: 'var(--text-muted)' }}>
-                                    <span style={{ color: '#b7791f' }}>{pending} pending</span>
+                                    <span style={{ color: 'var(--accent)' }}>{pending} pending</span>
                                     <span>·</span>
-                                    <span style={{ color: '#059669' }}>{completed} complete</span>
+                                    <span style={{ color: 'var(--text-primary)' }}>{completed} complete</span>
                                 </div>
                             </div>
                             <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)' }}>Pending Outcomes</div>
-                                <div style={{ fontSize: '48px', fontWeight: 700, letterSpacing: '-0.03em', color: '#b7791f' }}>{pending}</div>
+                                <div style={{ fontSize: '40px', fontWeight: 800, letterSpacing: '-0.05em', color: 'var(--accent)' }}>{pending}</div>
                                 <button className="btn btn-ghost btn-sm" style={{ width: 'fit-content' }} onClick={() => setActiveTab('decisions')}>View decisions →</button>
                             </div>
                             <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                 <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)' }}>Outcomes Recorded</div>
-                                <div style={{ fontSize: '48px', fontWeight: 700, letterSpacing: '-0.03em', color: '#059669' }}>{completed}</div>
+                                <div style={{ fontSize: '40px', fontWeight: 800, letterSpacing: '-0.05em', color: 'var(--text-primary)' }}>{completed}</div>
                                 <button className="btn btn-ghost btn-sm" style={{ width: 'fit-content' }} onClick={() => { setActiveTab('analytics'); fetchAnalytics(); }}>View analytics →</button>
                             </div>
                             <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '10px', cursor: 'pointer', borderStyle: 'dashed' }}
                                 onClick={() => { resetDecisionForm(); setShowDecisionModal(true); }}>
                                 <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-muted)' }}>New Decision</div>
-                                <div style={{ fontSize: '48px', fontWeight: 300, color: '#2563eb' }}>+</div>
+                                <div style={{ fontSize: '40px', fontWeight: 300, color: 'var(--accent)' }}>+</div>
                                 <div style={{ fontSize: '12px', color: 'var(--text-faint)' }}>Log a new decision</div>
                             </div>
                         </div>
@@ -463,7 +463,7 @@ export default function DashboardClient({ user, initialDecisions, initialOutcome
                                 </div>
                             </div>
                             <div className="form-group">
-                                <label className="label">Confidence Level: <strong style={{ color: '#2563eb' }}>{decisionForm.confidenceLevel}/10</strong></label>
+                                <label className="label">Confidence Level: <strong style={{ color: 'var(--accent)' }}>{decisionForm.confidenceLevel}/10</strong></label>
                                 <input type="range" min={1} max={10} value={decisionForm.confidenceLevel} onChange={(e) => setDecisionForm({ ...decisionForm, confidenceLevel: Number(e.target.value) })} style={{ width: '100%', accentColor: '#2563eb' }} />
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--text-faint)', marginTop: '4px' }}>
                                     <span>1 — Total uncertainty</span><span>10 — Absolute certainty</span>
@@ -498,7 +498,7 @@ export default function DashboardClient({ user, initialDecisions, initialOutcome
                                 <textarea className="input" rows={3} placeholder="What actually happened?" value={outcomeForm.actualOutcome} onChange={(e) => setOutcomeForm({ ...outcomeForm, actualOutcome: e.target.value })} />
                             </div>
                             <div className="form-group">
-                                <label className="label">Success Rating: <strong style={{ color: '#2563eb' }}>{outcomeForm.successRating}/10</strong></label>
+                                <label className="label">Success Rating: <strong style={{ color: 'var(--accent)' }}>{outcomeForm.successRating}/10</strong></label>
                                 <input type="range" min={1} max={10} value={outcomeForm.successRating} onChange={(e) => setOutcomeForm({ ...outcomeForm, successRating: Number(e.target.value) })} style={{ width: '100%', accentColor: '#2563eb' }} />
                             </div>
                             <div className="form-group">

@@ -472,3 +472,9 @@ a, button { transition:color .2s, background-color .2s, border-color .2s, box-sh
 button:not(:disabled):active { transform:scale(.97); }
 html { scroll-behavior:smooth; -webkit-font-smoothing:antialiased; }
 @media (prefers-reduced-motion:reduce) { main > *, main .grid > * { animation:none !important; } html { scroll-behavior:auto; } }
+
+/* DASHBOARD 2026 */
+.btn-primary { background:#2340FF !important; border:1px solid #2340FF !important; color:#fff !important; border-radius:0 !important; }
+.btn-primary:hover { background:#0A0A0A !important; border-color:#0A0A0A !important; }
+.btn-ghost { border-radius:0 !important; }
+.badge, [class*="badge"] { border-radius:2px !important; }
