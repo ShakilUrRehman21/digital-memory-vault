@@ -1,7 +1,7 @@
 @echo off
 title Memory Vault - localhost:3002
 cd /d "%~dp0"
-if not exist node_modules (
+if not exist node_modules\framer-motion (
   echo Installing dependencies...
   call npm install
 )

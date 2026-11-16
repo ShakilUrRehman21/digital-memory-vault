@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Inter_Tight, JetBrains_Mono } from 'next/font/google';
 import './landing.css';
+import { Reveal, Stagger, StaggerItem, ScrollProgress } from './motion/Motion';
 
 const sans = Inter_Tight({ subsets: ['latin'], weight: ['400', '500', '800'], variable: '--mv-sans' });
 const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--mv-mono' });
@@ -28,6 +29,7 @@ const features = [
 export default function LandingContent() {
   return (
     <div className={`mv ${sans.variable} ${mono.variable}`}>
+      <ScrollProgress color="#2340ff" />
       <header className="mv-wrap mv-nav">
         <Link href="/" className="mv-brand">Memory Vault</Link>
         <nav>
@@ -47,43 +49,43 @@ export default function LandingContent() {
         </section>
 
         <section className="mv-wrap mv-rise mv-d3" aria-label="Example decision timeline">
-          <div className="mv-tl">
+          <Stagger className="mv-tl" gap={0.12}>
             {timeline.map((e) => (
-              <div key={e.d} className={`mv-ev ${e.miss ? 'mv-miss' : ''}`}>
+              <StaggerItem key={e.d} className={`mv-ev ${e.miss ? 'mv-miss' : ''}`}>
                 <small>{e.d} &middot; {e.c} SURE</small>
                 <h3>{e.t}</h3>
                 <span className="mv-o">{e.o}</span>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </section>
 
         <section id="how" className="mv-wrap mv-how">
-          <p className="mv-kicker">How it works</p>
-          <div className="mv-steps">
+          <Reveal><p className="mv-kicker">How it works</p></Reveal>
+          <Stagger className="mv-steps" gap={0.14}>
             {steps.map(([t, d], i) => (
-              <div key={t}>
+              <StaggerItem key={t}>
                 <span className="mv-n">0{i + 1}</span>
                 <h2>{t}</h2>
                 <p>{d}</p>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         </section>
 
         <section className="mv-blue">
           <div className="mv-wrap mv-feat">
-            <h2>Every decision.<br />Every outcome.<br />Measured.</h2>
-            <div className="mv-list">
+            <Reveal><h2>Every decision.<br />Every outcome.<br />Measured.</h2></Reveal>
+            <Stagger className="mv-list">
               {features.map(([t, d]) => (
-                <div key={t}><h3>{t}</h3><p>{d}</p></div>
+                <StaggerItem key={t}><h3>{t}</h3><p>{d}</p></StaggerItem>
               ))}
-            </div>
+            </Stagger>
           </div>
         </section>
 
         <section className="mv-wrap mv-cta">
-          <h2>Start with one decision<br />you made today.</h2>
+          <Reveal><h2>Start with one decision<br />you made today.</h2></Reveal>
           <Link href="/auth/register" className="mv-btn">Open your vault &rarr;</Link>
         </section>
       </main>
