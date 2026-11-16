@@ -36,6 +36,12 @@ export async function proxy(request: NextRequest) {
         }
     }
 
+    // Never trust a client-supplied identity header on routes that skip verification.
+    if (request.headers.has('x-user-id')) {
+        const cleanHeaders = new Headers(request.headers);
+        cleanHeaders.delete('x-user-id');
+        return NextResponse.next({ request: { headers: cleanHeaders } });
+    }
     return NextResponse.next();
 }
 
